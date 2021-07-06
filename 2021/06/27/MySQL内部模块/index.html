@@ -138,8 +138,11 @@
 <meta property="og:image" content="https://avriesl.github.io/images/mysql/wait_timeout.png">
 <meta property="og:image" content="https://avriesl.github.io/images/mysql/max_connections.png">
 <meta property="og:image" content="https://avriesl.github.io/images/mysql/select.png">
+<meta property="og:image" content="https://img2020.cnblogs.com/blog/565213/202005/565213-20200530221711156-63363016.png">
+<meta property="og:image" content="https://dev.mysql.com/doc/refman/5.7/en/images/innodb-buffer-pool-list.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/733013/201805/733013-20180508101949424-938931340.png">
 <meta property="article:published_time" content="2021-06-26T19:16:14.000Z">
-<meta property="article:modified_time" content="2021-06-27T10:45:37.265Z">
+<meta property="article:modified_time" content="2021-07-06T09:08:53.782Z">
 <meta property="article:author" content="听潮春雷">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="MySQL">
@@ -476,7 +479,6 @@
 <p>如有错误或疑问，欢迎讨论！</p>
 <span id="more"></span>
 
-<p>[TOC]</p>
 <h1 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h1><h2 id="物理架构"><a href="#物理架构" class="headerlink" title="物理架构"></a>物理架构</h2><p><img src="https://lalitvc.files.wordpress.com/2016/11/mysql_physical_arch2.png" alt="MySQL的物理架构"></p>
 <h3 id="Base-Directory"><a href="#Base-Directory" class="headerlink" title="Base Directory"></a>Base Directory</h3><p>MySQL二进制文件目录</p>
 <p><strong>Program log files(程序日志文件)：</strong></p>
@@ -601,7 +603,113 @@
 
 <p>最后记得关闭追踪功能</p>
 </blockquote>
-<h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><h2 id="更新（update-insert-delete）执行流程"><a href="#更新（update-insert-delete）执行流程" class="headerlink" title="更新（update/insert/delete）执行流程"></a>更新（update/insert/delete）执行流程</h2>
+<h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/storage-engines.html">MySQL :: MySQL 5.7 Reference Manual :: 15 Alternative Storage Engines</a></p>
+<p>当优化器生成最优<strong>执行计划</strong>后，执行器会将执行计划交给存储引擎，存储引擎会通过执行计划在实际数据文件内查询数据。</p>
+<p>在MySQL中，支持多种存储引擎，可以通过show engines语句查询你的服务器支持哪些存储引擎。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engines;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> Engine             <span class="operator">|</span> Support <span class="operator">|</span> Comment         <span class="operator">|</span> Transactions <span class="operator">|</span> XA  <span class="operator">|</span> Savepoints <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> PERFORMANCE_SCHEMA <span class="operator">|</span> YES     <span class="operator">|</span> Performance ... <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> MRG_MYISAM         <span class="operator">|</span> YES     <span class="operator">|</span> Collection of...<span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> MyISAM             <span class="operator">|</span> YES     <span class="operator">|</span> MyISAM stora... <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> BLACKHOLE          <span class="operator">|</span> YES     <span class="operator">|</span> <span class="operator">/</span>dev<span class="operator">/</span><span class="keyword">null</span> st... <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB             <span class="operator">|</span> <span class="keyword">DEFAULT</span> <span class="operator">|</span> Supports tra... <span class="operator">|</span> YES          <span class="operator">|</span> YES <span class="operator">|</span> YES        <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> MEMORY             <span class="operator">|</span> YES     <span class="operator">|</span> Hash based ...  <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> ARCHIVE            <span class="operator">|</span> YES     <span class="operator">|</span> Archive stor... <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> CSV                <span class="operator">|</span> YES     <span class="operator">|</span> CSV storage...  <span class="operator">|</span> <span class="keyword">NO</span>           <span class="operator">|</span> <span class="keyword">NO</span>  <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br><span class="line"><span class="operator">|</span> FEDERATED          <span class="operator">|</span> <span class="keyword">NO</span>      <span class="operator">|</span> Federated My... <span class="operator">|</span>              <span class="operator">|</span>     <span class="operator">|</span>            <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+---------+-----------------+--------------+-----+------------+</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="更新（update-insert-delete）执行流程"><a href="#更新（update-insert-delete）执行流程" class="headerlink" title="更新（update/insert/delete）执行流程"></a>更新（update/insert/delete）执行流程</h2><p><img src="https://img2020.cnblogs.com/blog/565213/202005/565213-20200530221711156-63363016.png" alt="更新流程"></p>
+<ol>
+<li><p>MySQL会先执行一遍查询流程，先查询出待修改数据，并将其存入Buffer Pool中;</p>
+</li>
+<li><p>将待修改数据写入undo log中，以用于回滚时需要;</p>
+</li>
+<li><p>修改Buffer Pool中数据;</p>
+</li>
+<li><p>写入redo log buffer中;</p>
+</li>
+<li><p>当更新事务执行完成后，将redo log buffer中记录，刷入磁盘中，并标记为prepare;</p>
+</li>
+<li><p>记录bin log;</p>
+</li>
+<li><p>提交事务，并将redo log中对应行标记改为commit;</p>
+</li>
+</ol>
+<p>至此更新语句执行完成。</p>
+<h3 id="Buffer-Pool"><a href="#Buffer-Pool" class="headerlink" title="Buffer Pool"></a>Buffer Pool</h3><h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>官方文档如下: </p>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-buffer-pool.html">MySQL :: MySQL 5.7 Reference Manual :: 14.5.1 Buffer Pool</a></p>
+<p>首先，通过官方文档的描述，可以发现</p>
+<p><code>The buffer pool is an area in main memory where </code>InnoDB<code> caches table and index data as it is accessed. The buffer pool permits frequently used data to be accessed directly from memory, which speeds up processing. On dedicated servers, up to 80% of physical memory is often assigned to the buffer pool.</code></p>
+<ol>
+<li><p>buffer pool是存在于内存中;</p>
+</li>
+<li><p>在InnoDB存储引擎访问缓存表与索引数据时会用到;</p>
+</li>
+<li><p>buffer pool可以用来加快数据处理速度(调优的一个方向)。</p>
+</li>
+</ol>
+<p>所以，buffer pool是由InnoDB存储引擎管理的一块存在于内存的缓存区。</p>
+<p><strong>为什么需要buffer pool?</strong></p>
+<p>通过更新语句的执行流程我们发现，整个更新操作均是在buffer pool中进行的，那么为什么需要这样操作呢？</p>
+<p>首先，我们了解数据文件是存储在磁盘上的，而且对于计算机来说，内存的读取速度是远远大于磁盘的</p>
+<p>那么，如果我们每次更新操作都落地到磁盘上，那么IO代价就会太大了</p>
+<p>所以，InnoDB将数据的更新结果，先写入到buffer pool中，从而来减少IO操作</p>
+<p><strong>为什么不把所有数据都放到buffer pool?</strong></p>
+<ol>
+<li><p>buffer pool存在于内存中，内存虽然访问快，但是容量小;</p>
+</li>
+<li><p>内存中的数据不是持久的，在主机关机后，内存中的数据会丢失;</p>
+</li>
+</ol>
+<h4 id="Buffer-Pool预读"><a href="#Buffer-Pool预读" class="headerlink" title="Buffer Pool预读"></a>Buffer Pool预读</h4><p>首先，InnoDB在读取数据时，不是按需读取，而是按页读取，因为<strong>局部性原则</strong>，在数据访问时，使用一些数据，大概率会使用<br>附近的数据，从而通过按页读取会省去后续读取的IO操作，从而提高效率。</p>
+<blockquote>
+<p>MySQL默认一页16K</p>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_page_size">MySQL :: MySQL 5.7 Reference Manual :: 14.15 InnoDB Startup Options and System Variables</a></p>
+</blockquote>
+<p>MySQL的两种预读算法：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/geaozhang/p/7397699.html">关于MySQL buffer pool的预读机制 - GeaoZhang - 博客园 (cnblogs.com)</a></p>
+<h4 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h4><p>InnoDB通过刷脏的方式，来解决内存、磁盘间的数据一致性</p>
+<p><strong>刷脏</strong>: 在InnoDB中存在一个专门的线程，负责每隔一段时间就一次性将多个修改写入磁盘</p>
+<p><strong>脏页</strong>: buffer pool中与磁盘数据页内容不一致的数据页</p>
+<p><strong>干净页</strong>: 刷脏后，buffer pool中与磁盘数据页内容一致的数据页</p>
+<p><strong>刷脏的触发条件</strong>:</p>
+<ol>
+<li><p>到达设定时间后，InnoDB会执行刷脏; </p>
+</li>
+<li><p>buffer pool满了，InnoDB会强制执行刷脏; </p>
+</li>
+<li><p>redo log满了，InnoDB会使更新操作拥塞; </p>
+</li>
+<li><p>MySQL关闭的时候。</p>
+</li>
+</ol>
+<blockquote>
+<p>因为刷脏是将内存中的数据页写入磁盘中，那么在MySQL执行刷脏的时候，或者脏页还没有进行刷脏的时候，<br>服务器发生了断电等情况，这样会可能会破坏数据文件，所以MySQL引入了redo log用于持久化。</p>
+<p>在buffer pool中的更新操作均会记入redo log中，更新操作未提交时redo log记录的行标记未prepare,<br>在事务提交后，redo log记录行标记为commit。若出现断电的情况，在重启数据库时，MySQL会通过redo log<br>重做缺失操作。</p>
+</blockquote>
+<h4 id="buffer-pool清理算法"><a href="#buffer-pool清理算法" class="headerlink" title="buffer pool清理算法"></a>buffer pool清理算法</h4><p><img src="https://dev.mysql.com/doc/refman/5.7/en/images/innodb-buffer-pool-list.png" alt="buffer pool list"></p>
+<p>buffer pool使用LRU算法的变种来管理</p>
+<p>InnoDB将buffer pool内存区域分成两块：new sublist、old sublist，内存区域中点为new sublist的尾节点与old sublist的头节点;</p>
+<p>当InnoDB将一个新的数据页读入buffer pool时，将新数据页插入到old sublist的头节点处，若buffer pool无空间用于插入新数据页，<br>则清理buffer pool中old sublist的尾节点;</p>
+<p>当访问old sublist中数据页时，将其置入new sublist的头节点;</p>
+<p>随着数据的访问，buffer pool中未被访问的数据页，会逐步老化，当数据页到达old sublist尾节点时，若插入新数据页，则将其清理;</p>
+<h3 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h3><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-redo-log.html">MySQL :: MySQL 5.7 Reference Manual :: 14.6.6 Redo Log</a></p>
+<p><img src="https://images2018.cnblogs.com/blog/733013/201805/733013-20180508101949424-938931340.png" alt="InnoDB log"></p>
+<p>在InnoDB存储引擎中引入了一种日志，叫redo log（重做日志），redo log是一种基于磁盘的数据结构，他主要分为两个部分：<br>内存中的日志缓冲(redo log buffer)、磁盘上的重做日志文件(redo log file)。</p>
+<p>redo log主要用于在数据库崩溃恢复期间纠正不完整事务写入的数据。</p>
+<p>在默认情况下，redo log在磁盘中以ib_logfile0与ib_logfile1两个文件名字表示。</p>
+<p>InnoDB通过force log at commit（提交时强制记录）机制来实现事务持久性</p>
+<p><strong>force log at commit（提交时强制记录）机制</strong>: </p>
+<ul>
+<li><p>当事务提交时，优先保证该事务的所有日志写入到日志文件中持久化之后，再完成commit操作;</p>
+</li>
+<li><p>当日志写入日志文件时，日志缓冲(log buffer)先写入文件系统缓冲，并调用fsync操作。</p>
+</li>
+</ul>
+<p><strong>fsync函数</strong>: 同步内存中所有已修改的文件数据到储存设备，性能取决于磁盘性能。</p>
+<h3 id="bin-log"><a href="#bin-log" class="headerlink" title="bin log"></a>bin log</h3><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html">MySQL :: MySQL 5.7 Reference Manual :: 5.4.4 The Binary Log</a></p>
+<p>bin log是MySQL server层的一个二进制日志文件，他可以被所有存储引擎使用。</p>
+<p>bin log以事件的形式记录了数据库中发生的所有DML/DDL语句</p>
+<p>主要作用有两个：</p>
+<ol>
+<li>用于实现主从复制</li>
+</ol>
+<p>因为bin log中记录了数据库中发生的所有DML/DDL语句，所以在MySQL集群时，可以指定master节点进行更新（update/insert/delete）操作，<br>salve节点进行读取（select）操作实现读写分离，同时在salve节点中开启线程读取master节点中bin log，复现在master节点中执行过的更新操作，<br>从而实现数据一致。</p>
+<ol start="2">
+<li>用于数据恢复</li>
+</ol>
+<p>读取原数据库中binlog，开启线程复现binlog中记录的更新操作，从而完成数据恢复。</p>
+
       
     </div>
     
@@ -862,7 +970,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">整体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E6%9E%B6%E6%9E%84"><span class="nav-text">物理架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Base-Directory"><span class="nav-text">Base Directory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-Directory"><span class="nav-text">Data Directory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84"><span class="nav-text">逻辑架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client%EF%BC%88%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%89"><span class="nav-text">Client（客户端）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%AB%AF%EF%BC%89"><span class="nav-text">Server（服务端）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Connections%EF%BC%88%E8%BF%9E%E6%8E%A5%E5%99%A8%EF%BC%89"><span class="nav-text">Connections（连接器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Query-Cache%EF%BC%88%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98%EF%BC%89"><span class="nav-text">Query Cache（查询缓存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parser%EF%BC%88%E8%A7%A3%E6%9E%90%E5%99%A8%EF%BC%89"><span class="nav-text">Parser（解析器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimizer%EF%BC%88%E4%BC%98%E5%8C%96%E5%99%A8%EF%BC%89"><span class="nav-text">Optimizer（优化器）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Engine%EF%BC%88%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%EF%BC%89"><span class="nav-text">Storage Engine（存储引擎）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SQL%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">SQL执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%EF%BC%88select%EF%BC%89%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">查询（select）执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E5%99%A8"><span class="nav-text">连接器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="nav-text">通信协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="nav-text">通信方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%96%B9%E5%BC%8F"><span class="nav-text">连接方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98"><span class="nav-text">查询缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="nav-text">解析器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="nav-text">词法解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="nav-text">语法解析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-text">预处理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%99%A8"><span class="nav-text">优化器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-text">存储引擎</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%EF%BC%88update-insert-delete%EF%BC%89%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">更新（update&#x2F;insert&#x2F;delete）执行流程</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">整体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E6%9E%B6%E6%9E%84"><span class="nav-text">物理架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Base-Directory"><span class="nav-text">Base Directory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-Directory"><span class="nav-text">Data Directory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84"><span class="nav-text">逻辑架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client%EF%BC%88%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%89"><span class="nav-text">Client（客户端）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%AB%AF%EF%BC%89"><span class="nav-text">Server（服务端）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Connections%EF%BC%88%E8%BF%9E%E6%8E%A5%E5%99%A8%EF%BC%89"><span class="nav-text">Connections（连接器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Query-Cache%EF%BC%88%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98%EF%BC%89"><span class="nav-text">Query Cache（查询缓存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parser%EF%BC%88%E8%A7%A3%E6%9E%90%E5%99%A8%EF%BC%89"><span class="nav-text">Parser（解析器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimizer%EF%BC%88%E4%BC%98%E5%8C%96%E5%99%A8%EF%BC%89"><span class="nav-text">Optimizer（优化器）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Engine%EF%BC%88%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%EF%BC%89"><span class="nav-text">Storage Engine（存储引擎）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SQL%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">SQL执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%EF%BC%88select%EF%BC%89%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">查询（select）执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E5%99%A8"><span class="nav-text">连接器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="nav-text">通信协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="nav-text">通信方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%96%B9%E5%BC%8F"><span class="nav-text">连接方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98"><span class="nav-text">查询缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="nav-text">解析器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="nav-text">词法解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E8%A7%A3%E6%9E%90"><span class="nav-text">语法解析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-text">预处理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%99%A8"><span class="nav-text">优化器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-text">存储引擎</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%EF%BC%88update-insert-delete%EF%BC%89%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-text">更新（update&#x2F;insert&#x2F;delete）执行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Buffer-Pool"><span class="nav-text">Buffer Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Buffer-Pool%E9%A2%84%E8%AF%BB"><span class="nav-text">Buffer Pool预读</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-text">数据一致性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#buffer-pool%E6%B8%85%E7%90%86%E7%AE%97%E6%B3%95"><span class="nav-text">buffer pool清理算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bin-log"><span class="nav-text">bin log</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
