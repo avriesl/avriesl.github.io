@@ -1,0 +1,22 @@
+{
+  "name": "tuarus",
+  "version": "1.0.0",
+  "author": "Tuarus",
+  "scripts": {
+    "dev": "vuepress dev . --open --host \"localhost\"",
+    "build": "vuepress build ."
+  },
+  "devDependencies": {
+    "vuepress": "1.8.2",
+    "vuepress-theme-reco": "1.6.14"
+  },
+  "description": "",
+  "dependencies": {
+    "@vuepress-reco/vuepress-plugin-kan-ban-niang": "^1.0.5",
+    "vuepress-plugin-cursor-effects": "^1.1.4",
+    "vuepress-plugin-dynamic-title": "^1.0.0",
+    "vuepress-plugin-flowchart": "^1.5.0",
+    "vuepress-plugin-ribbon": "^1.1.4",
+    "vuepress-plugin-sitemap": "^2.3.1"
+  }
+}
